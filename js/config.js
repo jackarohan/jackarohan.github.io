@@ -2,7 +2,7 @@
 window.DASH_CONFIG = {
   g_trend: 0.018,
   defaultRates: 'FRED_JSON',
-  fredApiKey: '299e8ed99ca79ba973bb5ad9078beed6', // ok to expose
+  fredApiKey: '21dcbd8202ef8e0e05f91b1e8faeb417', // ok to expose
   cacheTTLMinutes: 180,
   // Optional: host your own static JSON for nominal/real yields (CORS-safe)
   altNominalURL: '', // e.g., 'https://<user>.github.io/data/yield_nominal.json'
