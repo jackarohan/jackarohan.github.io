@@ -1,62 +1,132 @@
-<script>
 // js/app.js
 (function(){
-  var CFG = window.DASH_CONFIG;
-  var ratesSource = CFG.defaultRates;
-  var offline = false;
-  var dark = true;
+  const CFG = window.DASH_CONFIG;
 
-  function setVal(id, txt){ var el=document.getElementById(id); if(el) el.textContent = txt; }
-  function stamp(){ var el=document.getElementById('stamp'); if(el) el.textContent = 'Last refresh: '+ new Date().toLocaleString(); }
+  let ratesSource = CFG.defaultRates; // 'FRED_JSON' | 'TREASURY'
+  let offline = false;
+  let dark = true;
+  let charts = {};
+
+  function set(valId, txt){ const el=document.getElementById(valId); if(el) el.textContent = txt; }
+  function spin(id, on){ const el=document.getElementById(id); if(!el) return; el.classList.toggle('hidden', !on); }
+
+  function stamp(msg){ document.getElementById('stamp').textContent = (msg||'') + ' • ' + new Date().toLocaleString(); }
+  function status(txt){ document.getElementById('statusBadge').textContent = txt; }
+
+  async function loadKPI(name, fn, setter, spinnerId){
+    try{
+      spin(spinnerId, true);
+      const data = await fn();
+      setter(data);
+      spin(spinnerId, false);
+      return true;
+    }catch(e){
+      console.error(name, e);
+      setTimeout(()=>spin(spinnerId, false), 0);
+      setter(null, e);
+      return false;
+    }
+  }
+
+  async function loadAll(){
+    status('Loading…');
+
+    // Reset values
+    ['k_interest_outlays','k_interest_receipts','k_bills_share','k_rmg','k_tp_kw','k_tp_acm','k_wam','k_slope']
+      .forEach(id=>set(id,'…'));
+
+    const ok = await Promise.all([
+      loadKPI('MTS',
+        ()=>Data.getMTS_TTM({offline, cache:true}),
+        (mts)=>{
+          if(!mts){ set('k_interest_outlays','Unavailable'); set('k_interest_receipts','Unavailable'); return; }
+          const io = (mts.outlays>0) ? mts.interest/mts.outlays : null;
+          const ir = (mts.receipts>0) ? mts.interest/mts.receipts : null;
+          set('k_interest_outlays', _util.fmtPct(io));
+          set('k_interest_receipts', _util.fmtPct(ir));
+          // simple bar chart with the two ratios
+          try{
+            const ctx = document.getElementById('ch_interest').getContext('2d');
+            charts.c1?.destroy();
+            charts.c1 = new Chart(ctx, { type:'bar',
+              data:{ labels:['Int/Outlays','Int/Receipts'], datasets:[{label:'TTM', data:[io*100, ir*100]}] },
+              options:{ plugins:{legend:{display:false}}, scales:{y:{title:{display:true,text:'%'}}} }
+            });
+          }catch(_){}
+        }, 's_io'
+      ),
+
+      loadKPI('MSPD',
+        ()=>Data.getMSPD_Mix({offline, cache:true}),
+        (mix)=>{
+          if(!mix){ set('k_bills_share','Unavailable'); set('k_wam','Unavailable'); return; }
+          const total = mix.total||1;
+          const bills = (mix.by['Bills']||0)/total, frns=(mix.by['FRNs']||0)/total;
+          const notes=(mix.by['Notes']||0)/total, bonds=(mix.by['Bonds']||0)/total, tips=(mix.by['TIPS']||0)/total;
+          set('k_bills_share', _util.fmtPct(bills+frns));
+          const wam = bills*0.5 + frns*1.8 + notes*5.5 + bonds*20 + tips*8;
+          set('k_wam', isFinite(wam) ? wam.toFixed(1)+' yrs' : 'Unavailable');
+
+          try{
+            const ctx = document.getElementById('ch_mix').getContext('2d');
+            charts.c2?.destroy();
+            charts.c2 = new Chart(ctx, { type:'bar',
+              data:{ labels:['Bills','FRNs','Notes','Bonds','TIPS'], datasets:[{label:'Share', data:[bills*100,frns*100,notes*100,bonds*100,tips*100]}] },
+              options:{ plugins:{legend:{display:false}}, scales:{y:{title:{display:true,text:'%'}}} }
+            });
+          }catch(_){}
+        }, 's_bf'
+      ),
+
+      loadKPI('Rates',
+        ()=>Data.getRates({offline, source:ratesSource, cache:true}),
+        (r)=>{
+          if(!r){ set('k_slope','Unavailable'); set('k_rmg','Unavailable'); return; }
+          set('k_slope', _util.fmtPP(r.slope,2));
+          const r10 = (r.dfii10 ?? null)/100.0;
+          const rmg_pp = (r10 - CFG.g_trend) * 100;
+          set('k_rmg', _util.fmtPP(rmg_pp,2));
+
+          try{
+            const ctx = document.getElementById('ch_rates').getContext('2d');
+            charts.c3?.destroy();
+            charts.c3 = new Chart(ctx, { type:'bar',
+              data:{ labels:['Slope (pp)','10y real (%)'], datasets:[{label:'Latest', data:[r.slope, r.dfii10]}] },
+              options:{ plugins:{legend:{display:false}}, scales:{y:{title:{display:true,text:'pp / %'}}} }
+            });
+          }catch(_){}
+        }, 's_slope'
+      ),
+
+      loadKPI('KW',
+        ()=>Data.getTP_KW({offline, cache:true}),
+        (v)=>{ set('k_tp_kw', _util.fmtPP(v,2)); }, 's_kw'
+      ),
+
+      loadKPI('ACM',
+        ()=>Data.getTP_ACM({offline, cache:true}),
+        (v)=>{ set('k_tp_acm', (v==null)?'Disabled':_util.fmtPP(v,2)); }, 's_acm'
+      )
+    ]);
+
+    const allOk = ok.every(Boolean);
+    status(allOk ? 'OK' : 'Partial');
+    stamp(`Rates=${ratesSource}${offline?' (offline)':''}`);
+  }
 
   function wire(){
-    var sel = document.getElementById('ratesSource');
-    var off = document.getElementById('offline');
-    var theme = document.getElementById('theme');
+    const sel = document.getElementById('ratesSource');
+    const off = document.getElementById('offline');
+    const theme = document.getElementById('theme');
+    const retry = document.getElementById('retryBtn');
 
-    sel.value = ratesSource; off.checked = offline; theme.checked = dark;
-    document.body.classList.toggle('light', !dark);
-
-    sel.addEventListener('change', function(e){ ratesSource = e.target.value; load(); });
-    off.addEventListener('change', function(e){ offline = e.target.checked; load(); });
-    theme.addEventListener('change', function(e){ dark = e.target.checked; document.body.classList.toggle('light', !dark); });
+    sel.value = ratesSource; off.checked = offline; theme.checked = dark; document.body.classList.toggle('light', !dark);
+    sel.addEventListener('change', e=>{ ratesSource = e.target.value; loadAll(); });
+    off.addEventListener('change', e=>{ offline = e.target.checked; loadAll(); });
+    theme.addEventListener('change', e=>{ dark = e.target.checked; document.body.classList.toggle('light', !dark); });
+    retry.addEventListener('click', ()=>loadAll());
   }
 
-  function load(){
-    ['k_interest_outlays','k_interest_receipts','k_bills_share','k_rmg','k_tp_kw','k_tp_acm','k_wam','k_slope'].forEach(function(id){ setVal(id,'…'); });
-
-    Promise.all([ Data.getMTS_TTM(offline), Data.getMSPD_Mix(offline) ]).then(function(v){
-      var mts=v[0], mix=v[1];
-      var io = (mts.outlays>0)? (mts.interest/mts.outlays):null;
-      var ir = (mts.receipts>0)? (mts.interest/mts.receipts):null;
-      setVal('k_interest_outlays', _util.fmtPct(io,1));
-      setVal('k_interest_receipts', _util.fmtPct(ir,1));
-
-      var total = mix.total||1;
-      var bills = (mix.by['Bills']||0)/total, frns = (mix.by['FRNs']||0)/total;
-      setVal('k_bills_share', _util.fmtPct(bills+frns,1));
-      var wam = bills*0.5 + frns*1.8 + ((mix.by['Notes']||0)/total)*5.5 + ((mix.by['Bonds']||0)/total)*20 + ((mix.by['TIPS']||0)/total)*8;
-      setVal('k_wam', isFinite(wam) ? wam.toFixed(1)+' yrs' : '—');
-
-      var pRates = (ratesSource==='TREASURY') ? Data.getRates_TreasuryXML(offline) : Data.getRates_FRED();
-      pRates.then(function(rates){
-        var r = (rates.dfii10!=null) ? (rates.dfii10/100.0) : null;
-        var g = CFG.g_trend, rmg_pp = (r!=null)? ((r-g)*100.0):null;
-        setVal('k_rmg', _util.fmtPP(rmg_pp,2));
-        setVal('k_slope', _util.fmtPP(rates.slope,2));
-        setVal('chart_rates', '10y nominal '+(rates.dgs10!=null?rates.dgs10.toFixed(2)+'%':'—')+' | 10y real '+(rates.dfii10!=null?rates.dfii10.toFixed(2)+'%':'—')+' | slope '+_util.fmtPP(rates.slope,2));
-      }).catch(function(){ setVal('k_rmg','—'); setVal('k_slope','—'); });
-
-      Data.getTP_KW().then(function(kw){ setVal('k_tp_kw', _util.fmtPP(kw,2)); }).catch(function(){ setVal('k_tp_kw','—'); });
-      Data.getTP_ACM(offline).then(function(acm){ setVal('k_tp_acm', acm==null ? 'Unavailable' : _util.fmtPP(acm,2)); }).catch(function(){ setVal('k_tp_acm','Unavailable'); });
-
-      setVal('chart_interest','TTM interest/outlays: '+_util.fmtPct(io,1)+' | interest/receipts: '+_util.fmtPct(ir,1));
-      setVal('chart_mix','Mix: Bills '+(bills*100).toFixed(1)+'%, FRNs '+(frns*100).toFixed(1)+'%, Notes '+(((mix.by['Notes']||0)/total)*100).toFixed(1)+'%, Bonds '+(((mix.by['Bonds']||0)/total)*100).toFixed(1)+'%, TIPS '+(((mix.by['TIPS']||0)/total)*100).toFixed(1)+'%');
-
-      stamp();
-    }).catch(function(err){ setVal('chart_interest','Load failed. '+(err&&err.message?err.message:'')); stamp(); });
-  }
-
-  wire(); load();
+  wire();
+  loadAll();
 })();
-</script>

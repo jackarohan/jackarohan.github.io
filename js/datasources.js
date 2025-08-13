@@ -1,127 +1,145 @@
-<script>
 // js/datasources.js
 (function(){
-  var CFG = window.DASH_CONFIG;
-  var FISCAL = 'https://api.fiscaldata.treasury.gov/services/api/fiscal_service';
+  const CFG = window.DASH_CONFIG;
+  const FISCAL = 'https://api.fiscaldata.treasury.gov/services/api/fiscal_service';
 
-  function fredLatest(series){
-    var url = 'https://api.stlouisfed.org/fred/series/observations?series_id='
-      + encodeURIComponent(series)
-      + '&file_type=json&sort_order=desc&limit=5&api_key='
-      + encodeURIComponent(CFG.fredApiKey);
-    return _util.fetchJSON(url).then(function(js){
-      var arr = (js && js.observations) ? js.observations : [];
-      for(var i=0;i<arr.length;i++){
-        var v = arr[i].value;
-        if(v!=null && v!=='.' && v!=='' && !isNaN(+v)) return +v;
+  // --- FRED JSON helper (CORS-friendly) ---
+  async function fredLatest(series, signal){
+    const url = 'https://api.stlouisfed.org/fred/series/observations?' + new URLSearchParams({
+      series_id: series, file_type:'json', sort_order:'desc', limit:'5', api_key: CFG.fredApiKey
+    });
+    const js = await _util.fetchJSON(url, signal);
+    const obs = (js.observations||[]).find(o => o.value && o.value !== '.');
+    return obs ? +obs.value : null;
+  }
+
+  // --- MTS TTM (receipts/outlays/interest) ---
+  async function getMTS_TTM({offline=false, cache=true}={}){
+    const CK = 'mts_ttm';
+    if(cache){ const c = _util.getCache(CK, CFG.cacheTTLMinutes*60*1000); if(c) return c; }
+
+    async function live(signal){
+      const t1 = await _util.fetchJSON(
+        FISCAL+'/v1/accounting/mts/mts_table_1?'+new URLSearchParams({
+          format:'json', fields:'record_date,current_month_gross_rcpt_amt,current_month_outly_amt', sort:'-record_date', 'page[size]':'24'
+        }), signal);
+      const t3 = await _util.fetchJSON(
+        FISCAL+'/v1/accounting/mts/mts_table_3?'+new URLSearchParams({
+          format:'json', fields:'record_date,classification_desc,current_month_gross_outly_amt', sort:'-record_date', 'page[size]':'400'
+        }), signal);
+
+      const r1 = t1.data||[];
+      const rec = r1.map(x=>+x.current_month_gross_rcpt_amt||0).slice(0,12).reduce((a,b)=>a+b,0);
+      const out = r1.map(x=>+x.current_month_outly_amt||0).slice(0,12).reduce((a,b)=>a+b,0);
+      const niRows = (t3.data||[]).filter(r => String(r.classification_desc||'').toLowerCase().includes('net interest')
+                                           && String(r.classification_desc||'').toLowerCase().includes('public debt'));
+      let interest = niRows.map(x=>+x.current_month_gross_outly_amt||0).slice(0,12).reduce((a,b)=>a+b,0);
+      if(!interest){
+        const ie = await _util.fetchJSON(FISCAL+'/v2/accounting/od/interest_expense?'+new URLSearchParams({
+          format:'json', fields:'record_date,int_expense_amt', sort:'-record_date', 'page[size]':'24'
+        }), signal).catch(()=>({data:[]}));
+        interest = (ie.data||[]).map(x=>+x.int_expense_amt||0).slice(0,12).reduce((a,b)=>a+b,0);
       }
-      return null;
-    });
-  }
-
-  function getRates_FRED(){
-    if (CFG.fredApiKey) {
-      return Promise.all([fredLatest('DGS10'), fredLatest('DFII10'), fredLatest('T10Y2Y')])
-        .then(function(v){ return { dgs10:v[0], dfii10:v[1], slope:v[2] }; });
-    } else {
-      // legacy CSV fallback (may fail on iOS due to CORS)
-      var csv = function(id){ return _util.fetchText('https://fred.stlouisfed.org/graph/fredgraph.csv?id='+id).then(_util.parseCSV); };
-      return Promise.all([csv('DGS10'), csv('DFII10'), csv('T10Y2Y')]).then(function(rows){
-        function pick(a){ for(var i=a.length-1;i>=0;i--){ var key=null; for(var k in a[i]) if(k!=='DATE') key=k; var v=a[i][key]; if(v && v!=='.') return +v; } return null; }
-        return { dgs10: pick(rows[0]), dfii10: pick(rows[1]), slope: pick(rows[2]) };
-      });
+      return {receipts:rec, outlays:out, interest};
     }
-  }
-
-  function getRates_TreasuryXML(forceOffline){
-    var pNom = forceOffline
-      ? _util.fetchText(CFG.samples.yieldXML)
-      : _util.fetchText('https://home.treasury.gov/sites/default/files/interest-rates/yield.xml', {timeout:12000})
-          .catch(function(){ return _util.fetchText(CFG.samples.yieldXML); });
-    var pReal = forceOffline
-      ? _util.fetchText(CFG.samples.realYieldXML)
-      : _util.fetchText('https://home.treasury.gov/sites/default/files/interest-rates/realyield.xml', {timeout:12000})
-          .catch(function(){ return _util.fetchText(CFG.samples.realYieldXML); });
-
-    return Promise.all([pNom,pReal]).then(function(txts){
-      var n = _util.parseTreasuryXML(txts[0]);
-      var r = _util.parseTreasuryXML(txts[1]);
-      var n10 = +(n.BC_10YEAR || n.TCMNOMY10Y || n.BC10YEAR || 0);
-      var n2  = +(n.BC_2YEAR || n.TCMNOMY2Y || n.BC2YEAR || 0);
-      var r10 = +(r.BC_10YEAR || r.R_BC_10YEAR || r.TCMREAR10Y || 0);
-      return { dgs10: n10, dfii10: r10, slope: (n10 && n2) ? (n10 - n2) : null };
-    });
-  }
-
-  function getTP_KW(){
-    return CFG.fredApiKey ? fredLatest('THREEFYTP10')
-      : _util.fetchText('https://fred.stlouisfed.org/graph/fredgraph.csv?id=THREEFYTP10')
-          .then(_util.parseCSV)
-          .then(function(rows){ for(var i=rows.length-1;i>=0;i--){ var v=rows[i]['THREEFYTP10']; if(v && v!=='.') return +v; } return null; });
-  }
-
-  function getTP_ACM(forceOffline){
-    if(forceOffline){
-      return _util.fetchText(CFG.samples.acmCSV).then(_util.parseCSV).then(function(r){ var last=r[r.length-1]; return +last['ACMTP10']; });
+    async function samples(){ 
+      const t1 = await _util.fetchJSON(CFG.samples.mts_table_1);
+      const t3 = await _util.fetchJSON(CFG.samples.mts_table_3);
+      const rec = t1.data.map(x=>+x.current_month_gross_rcpt_amt||0).slice(0,12).reduce((a,b)=>a+b,0);
+      const out = t1.data.map(x=>+x.current_month_outly_amt||0).slice(0,12).reduce((a,b)=>a+b,0);
+      const interest = t3.data.map(x=>+x.current_month_gross_outly_amt||0).slice(0,12).reduce((a,b)=>a+b,0);
+      return {receipts:rec, outlays:out, interest};
     }
-    return _util.fetchText('https://www.newyorkfed.org/research/data_indicators/term-premia-tabs',{timeout:8000})
-      .then(function(page){ var m=page.match(/ACM\s*10-?year.*?([+-]?\d+\.\d+)/i); return m?+m[1]:null; })
-      .catch(function(){ return null; });
+
+    const data = offline 
+      ? await samples() 
+      : await _util.withTimeout((signal)=>live(signal), 12000, 'MTS');
+    if(cache) _util.setCache(CK, data);
+    return data;
   }
 
-  function getMTS_TTM(offline){
-    if(offline) return _util.fetchJSON(CFG.samples.mtsTTM);
-    var t1 = _util.fetchJSON(FISCAL+'/v1/accounting/mts/mts_table_1?format=json&fields=record_date,current_month_gross_rcpt_amt,current_month_outly_amt&sort=-record_date&page[size]=18');
-    var t3 = _util.fetchJSON(FISCAL+'/v1/accounting/mts/mts_table_3?format=json&fields=record_date,classification_desc,current_month_gross_outly_amt&filter='
-              +encodeURIComponent('classification_desc:eq:Net Interest (Public Debt)')+'&sort=-record_date&page[size]=18');
-    return Promise.all([t1,t3]).then(function(js){
-      var r1 = js[0].data||[], r3 = js[1].data||[];
-      var receipts = _util.sum12(r1.map(function(x){ return +x.current_month_gross_rcpt_amt||0; }));
-      var outlays  = _util.sum12(r1.map(function(x){ return +x.current_month_outly_amt||0; }));
-      if(r3 && r3.length>=12){
-        var interest = _util.sum12(r3.map(function(x){ return +x.current_month_gross_outly_amt||0; }));
-        return {receipts:receipts, outlays:outlays, interest:interest};
+  // --- MSPD Mix (latest, and trend series when possible) ---
+  async function getMSPD_Mix({offline=false, cache=true}={}){
+    const CK = 'mspd_mix';
+    if(cache){ const c=_util.getCache(CK, CFG.cacheTTLMinutes*60*1000); if(c) return c; }
+
+    async function live(signal){
+      const js = await _util.fetchJSON(FISCAL+'/v2/accounting/od/sbp_market_outstanding?'+new URLSearchParams({
+        format:'json', fields:'record_date,security_type_desc,outstanding_amt', sort:'-record_date', 'page[size]':'200'
+      }), signal);
+      const latest = js.data?.[0]?.record_date;
+      const rows = (js.data||[]).filter(r=>r.record_date===latest);
+      const by={}; rows.forEach(r=>by[r.security_type_desc]=(by[r.security_type_desc]||0)+(+r.outstanding_amt||0));
+      const total = Object.values(by).reduce((a,b)=>a+b,0);
+      return {date: latest, total, by};
+    }
+    async function samples(){
+      const js = await _util.fetchJSON(CFG.samples.mspd);
+      const latest = js.data?.[0]?.record_date;
+      const rows = js.data.filter(r=>r.record_date===latest);
+      const by={}; rows.forEach(r=>by[r.security_type_desc]=(by[r.security_type_desc]||0)+(+r.outstanding_amt||0));
+      const total = Object.values(by).reduce((a,b)=>a+b,0);
+      return {date: latest, total, by};
+    }
+    const data = offline ? await samples() : await _util.withTimeout(s=>live(s), 12000, 'MSPD');
+    if(cache) _util.setCache(CK, data);
+    return data;
+  }
+
+  // --- Rates (FRED JSON preferred; Treasury XML fallback) ---
+  async function getRates({offline=false, source='FRED_JSON', cache=true}={}){
+    const CK = 'rates_'+source;
+    if(cache){ const c=_util.getCache(CK, CFG.cacheTTLMinutes*60*1000); if(c) return c; }
+
+    async function fred(signal){
+      const [n10, r10, slope] = await Promise.all([
+        fredLatest('DGS10', signal), fredLatest('DFII10', signal), fredLatest('T10Y2Y', signal)
+      ]);
+      return {dgs10:n10, dfii10:r10, slope:slope};
+    }
+    async function treasury(signal){
+      // if user provided alternative JSON URLs (self-hosted), prefer them
+      if(CFG.altNominalURL && CFG.altRealURL){
+        const [njs, rjs] = await Promise.all([_util.fetchJSON(CFG.altNominalURL, signal), _util.fetchJSON(CFG.altRealURL, signal)]);
+        const n10 = +njs.latest10y || null, n2 = +njs.latest2y || null, r10 = +rjs.latest10y || null;
+        return {dgs10:n10, dfii10:r10, slope:(n10 && n2) ? (n10 - n2) : null};
       }
-      return _util.fetchJSON(FISCAL+'/v1/accounting/mts/mts_table_5?format=json&fields=record_date,classification_desc,current_month_net_outly_amt&filter='
-                +encodeURIComponent('classification_desc:eq:Net interest')+'&sort=-record_date&page[size]=18')
-        .then(function(t5){ var r5=t5.data||[]; var interest = _util.sum12(r5.map(function(x){ return +x.current_month_net_outly_amt||0; })); return {receipts:receipts, outlays:outlays, interest:interest}; });
-    }).catch(function(){ return _util.fetchJSON(CFG.samples.mtsTTM); });
+      // otherwise use XML feeds (fallback)
+      const xmlN = offline ? await _util.fetchText(CFG.samples.yieldXML) : await _util.fetchText('https://home.treasury.gov/sites/default/files/interest-rates/yield.xml');
+      const xmlR = offline ? await _util.fetchText(CFG.samples.realYieldXML) : await _util.fetchText('https://home.treasury.gov/sites/default/files/interest-rates/realyield.xml');
+      const n = _util.parseTreasuryXML(xmlN); const r = _util.parseTreasuryXML(xmlR);
+      const n10 = +(n.BC_10YEAR || n.TCMNOMY10Y || 0);
+      const n2  = +(n.BC_2YEAR || n.TCMNOMY2Y || 0);
+      const r10 = +(r.BC_10YEAR || r.TCMREAR10Y || 0);
+      return { dgs10:n10, dfii10:r10, slope:(n10 && n2) ? (n10 - n2) : null };
+    }
+
+    const data = (source==='FRED_JSON')
+      ? await _util.withTimeout(s=>fred(s), 10000, 'FRED')
+      : await _util.withTimeout(s=>treasury(s), 12000, 'Treasury');
+    if(cache) _util.setCache(CK, data);
+    return data;
   }
 
-  function getMSPD_Mix(offline){
-    if(offline) return _util.fetchJSON(CFG.samples.mspdMix);
-    var url = FISCAL+'/v2/accounting/od/sbp_market_outstanding?format=json&fields=record_date,security_type_desc,outstanding_amt&filter='
-              +encodeURIComponent('security_type_desc:in:(Bills,Notes,Bonds,TIPS,FRNs)')+'&sort=-record_date&page[size]=100';
-    return _util.fetchJSON(url).then(function(js){
-      var latest = js.data && js.data[0] ? js.data[0].record_date : null;
-      var rows = (js.data||[]).filter(function(r){ return r.record_date===latest; });
-      var total = rows.reduce(function(s,r){ return s+(+r.outstanding_amt||0); },0);
-      var by={}; rows.forEach(function(r){ by[r.security_type_desc]=+r.outstanding_amt||0; });
-      if(latest && total>0) return {date:latest,total:total,by:by};
-      throw new Error('v2 empty');
-    }).catch(function(){
-      var url2 = FISCAL+'/v1/debt/mspd/mspd_table_3_market?format=json&fields=record_date,security_type_desc,marketable_mil_amt&sort=-record_date&page[size]=200';
-      return _util.fetchJSON(url2).then(function(js2){
-        var latest = js2.data && js2.data[0] ? js2.data[0].record_date : null;
-        var rows = (js2.data||[]).filter(function(r){ return r.record_date===latest; });
-        var by={}, total=0;
-        for(var i=0;i<rows.length;i++){
-          var t=rows[i].security_type_desc||''; var v=(+rows[i].marketable_mil_amt||0)*1e6;
-          var key=/Bill/i.test(t)?'Bills':/FRN/i.test(t)?'FRNs':/Note/i.test(t)?'Notes':/Bond/i.test(t)?'Bonds':/TIPS/i.test(t)?'TIPS':null;
-          if(key){ by[key]=(by[key]||0)+v; total+=v; }
-        }
-        return {date:latest,total:total,by:by};
-      }).catch(function(){ return _util.fetchJSON(CFG.samples.mspdMix); });
-    });
+  // --- Term premia ---
+  async function getTP_KW({offline=false, cache=true}={}){
+    const CK='tp_kw'; if(cache){ const c=_util.getCache(CK, CFG.cacheTTLMinutes*60*1000); if(c) return c; }
+    const v = await _util.withTimeout(s=>fredLatest('THREEFYTP10', s), 8000, 'KW');
+    if(cache) _util.setCache(CK, v);
+    return v;
   }
 
-  window.Data = {
-    getRates_FRED: getRates_FRED,
-    getRates_TreasuryXML: getRates_TreasuryXML,
-    getTP_KW: getTP_KW,
-    getTP_ACM: getTP_ACM,
-    getMTS_TTM: getMTS_TTM,
-    getMSPD_Mix: getMSPD_Mix
-  };
+  async function getTP_ACM({offline=false, cache=true}={}){
+    if(CFG.acmCSVURL){
+      const rows = await _util.fetchText(CFG.acmCSVURL).then(_util.parseCSV);
+      const last = rows[rows.length-1]; return +last.ACMTP10;
+    }
+    if(offline){
+      const rows = await _util.fetchText(CFG.samples.acmCSV).then(_util.parseCSV);
+      const last = rows[rows.length-1]; return +last.ACMTP10;
+    }
+    return null; // disabled by default
+  }
+
+  window.Data = { getMTS_TTM, getMSPD_Mix, getRates, getTP_KW, getTP_ACM };
 })();
-</script>
