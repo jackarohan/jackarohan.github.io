@@ -1,0 +1,16 @@
+{
+  "data": [
+    {"record_date":"2025-07-01","classification_desc":"Net interest (public debt)","current_month_gross_outly_amt":"95000"},
+    {"record_date":"2025-06-01","classification_desc":"Net interest (public debt)","current_month_gross_outly_amt":"90000"},
+    {"record_date":"2025-05-01","classification_desc":"Net interest (public debt)","current_month_gross_outly_amt":"88000"},
+    {"record_date":"2025-04-01","classification_desc":"Net interest (public debt)","current_month_gross_outly_amt":"92000"},
+    {"record_date":"2025-03-01","classification_desc":"Net interest (public debt)","current_month_gross_outly_amt":"91000"},
+    {"record_date":"2025-02-01","classification_desc":"Net interest (public debt)","current_month_gross_outly_amt":"89000"},
+    {"record_date":"2025-01-01","classification_desc":"Net interest (public debt)","current_month_gross_outly_amt":"87000"},
+    {"record_date":"2024-12-01","classification_desc":"Net interest (public debt)","current_month_gross_outly_amt":"86000"},
+    {"record_date":"2024-11-01","classification_desc":"Net interest (public debt)","current_month_gross_outly_amt":"85000"},
+    {"record_date":"2024-10-01","classification_desc":"Net interest (public debt)","current_month_gross_outly_amt":"84000"},
+    {"record_date":"2024-09-01","classification_desc":"Net interest (public debt)","current_month_gross_outly_amt":"83000"},
+    {"record_date":"2024-08-01","classification_desc":"Net interest (public debt)","current_month_gross_outly_amt":"82000"}
+  ]
+}
