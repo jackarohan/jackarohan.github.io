@@ -1,12 +1,2 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<feed>
-  <title>Daily Treasury Real Yield Curve Rates</title>
-  <entry>
-    <NEW_DATE>2025-08-11</NEW_DATE>
-    <BC_5YEAR>1.56</BC_5YEAR>
-    <BC_7YEAR>1.72</BC_7YEAR>
-    <BC_10YEAR>1.87</BC_10YEAR>
-    <BC_20YEAR>2.03</BC_20YEAR>
-    <BC_30YEAR>2.09</BC_30YEAR>
-  </entry>
-</feed>
+<feed><entry><NEW_DATE>2025-08-11</NEW_DATE><BC_10YEAR>1.87</BC_10YEAR></entry></feed>
