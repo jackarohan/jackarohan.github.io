@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>US Debt Dashboard — v1.2.0</title>
+  <meta name="description" content="Client-side dashboard tracking US net interest burden, debt structure, and rate dynamics.">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="dark">
+  <header class="topbar">
+    <div class="brand">
+      <h1>US Debt Dashboard</h1>
+      <span class="tag">v1.2.0</span>
+    </div>
+    <div class="controls">
+      <label class="control">
+        <span>Rates source</span>
+        <select id="ratesSource">
+          <option value="FRED" selected>FRED</option>
+          <option value="TREASURY">Treasury XML</option>
+        </select>
+      </label>
+      <label class="control">
+        <input id="offline" type="checkbox">
+        <span>Offline test</span>
+      </label>
+      <label class="control">
+        <input id="theme" type="checkbox" checked>
+        <span>Dark mode</span>
+      </label>
+    </div>
+  </header>
+
+  <main>
+    <section class="kpis">
+      <div class="card">
+        <div class="kpi-title">Interest / Outlays (TTM)
+          <span class="help" data-tip="12‑month sum of Net Interest (Public Debt) / 12‑month Total Outlays. MTS datasets.">?</span>
+        </div>
+        <div class="kpi-value" id="k_interest_outlays">—</div>
+      </div>
+      <div class="card">
+        <div class="kpi-title">Interest / Receipts (TTM)
+          <span class="help" data-tip="12‑month sum of Net Interest (Public Debt) / 12‑month Total Receipts.">?</span>
+        </div>
+        <div class="kpi-value" id="k_interest_receipts">—</div>
+      </div>
+      <div class="card">
+        <div class="kpi-title">Bills + FRNs share
+          <span class="help" data-tip="Share of marketable debt outstanding in Bills and FRNs from MSPD. Proxy for pass‑through speed.">?</span>
+        </div>
+        <div class="kpi-value" id="k_bills_share">—</div>
+      </div>
+      <div class="card">
+        <div class="kpi-title">r − g
+          <span class="help" data-tip="10y real yield minus long‑run real growth trend (config default 1.8%).">?</span>
+        </div>
+        <div class="kpi-value" id="k_rmg">—</div>
+      </div>
+      <div class="card">
+        <div class="kpi-title">Term premium (KW 10y)
+          <span class="help" data-tip="Kim–Wright 10y term premium from FRED (THREEFYTP10).">?</span>
+        </div>
+        <div class="kpi-value" id="k_tp_kw">—</div>
+      </div>
+      <div class="card">
+        <div class="kpi-title">Term premium (ACM 10y)
+          <span class="help" data-tip="NY Fed ACM 10y term premium. Best‑effort retrieval; falls back to KW if unavailable.">?</span>
+        </div>
+        <div class="kpi-value" id="k_tp_acm">—</div>
+      </div>
+      <div class="card">
+        <div class="kpi-title">WAM (proxy)
+          <span class="help" data-tip="Mix‑weighted average maturity: Bills 0.5y, FRNs 1.8y, Notes 5.5y, Bonds 20y, TIPS 8y.">?</span>
+        </div>
+        <div class="kpi-value" id="k_wam">—</div>
+      </div>
+      <div class="card">
+        <div class="kpi-title">Curve slope (10y–2y)
+          <span class="help" data-tip="10y minus 2y yield (FRED T10Y2Y or Treasury XML).">?</span>
+        </div>
+        <div class="kpi-value" id="k_slope">—</div>
+      </div>
+    </section>
+
+    <section class="charts">
+      <h2>Context</h2>
+      <div id="chart_interest" class="chart">Interest vs Outlays TTM: (minimal text chart)</div>
+      <div id="chart_mix" class="chart">Marketable mix</div>
+      <div id="chart_rates" class="chart">Rates snapshot</div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Sources: Treasury FiscalData (MTS, MSPD); FRED (DGS10, DFII10, T10Y2Y, THREEFYTP10); Treasury XML feeds; NY Fed ACM.</p>
+    <p>Docs: <a href="README.md" target="_blank" rel="noopener">README</a></p>
+    <p id="stamp"></p>
+  </footer>
+
+  <script src="js/config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/datasources.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+{
+  "version": "v1.2.0",
+  "generated": "2025-08-13T03:52:27.340099Z",
+  "files": [
+    {
+      "file": "README.md",
+      "size": 744,
+      "sha256": "4721adf72ee8d8625d69dffc85f7e4773c1666886790850788539cdce40ef989"
+    },
+    {
+      "file": "index.html",
+      "size": 4131,
+      "sha256": "0f7d2033d787bf342826a41a87cf93b1939c5bba229df651c1b4c9fdd6fe40b3"
+    },
+    {
+      "file": "js/app.js",
+      "size": 3599,
+      "sha256": "5198eade15a28b3e1eda5a37e46787d334bb85f41eecf089fd6ed6ef07dc9b94"
+    },
+    {
+      "file": "js/config.js",
+      "size": 322,
+      "sha256": "ec71c321a55c8a7b1dc8e3974dc5cd61adc1c4c424402d37b5eb0485c17204df"
+    },
+    {
+      "file": "js/datasources.js",
+      "size": 5797,
+      "sha256": "cf09a1980d2e4a359716f70c27840e8d8bd9199c2e93198e441b3115e525ef03"
+    },
+    {
+      "file": "js/utils.js",
+      "size": 2071,
+      "sha256": "dd13b2a02c5408b00c122adbaf542f08a3bed4e1b1af1e6cf1c1b927d19c1981"
+    },
+    {
+      "file": "css/styles.css",
+      "size": 2349,
+      "sha256": "25296e0ba0949a992314ce16cb937e5e5393683afaa060fb33726f5ce96f1b60"
+    },
+    {
+      "file": "samples/acm_10y.csv",
+      "size": 45,
+      "sha256": "67355baa86993f5ebf6a19e56e783d13a12951e0ccf1afec80900669188affd8"
+    },
+    {
+      "file": "samples/realyield.xml",
+      "size": 322,
+      "sha256": "70cfdafdf302ad9bab444c783c1554df74fe0e2fa0744817c30af1134aea2f2a"
+    },
+    {
+      "file": "samples/yield.xml",
+      "size": 509,
+      "sha256": "0616cb3b66d784e4a37b29962c011af18f66087ea040e031953d4da07bc3035d"
+    },
+    {
+      "file": "tests/browser.html",
+      "size": 605,
+      "sha256": "ad783287a7f68a181457665a65ca73d18a82a008922b04a7cfda569e83f2a70d"
+    },
+    {
+      "file": "tests/spec.js",
+      "size": 961,
+      "sha256": "299d50f33ee9b0c2c6bd907c5e10b3e7b0394ccf4756278a09352364ed0a55ab"
+    },
+    {
+      "file": ".github/workflows/pages.yml",
+      "size": 636,
+      "sha256": "98c1c2e35f4b2c457a74f0891d924f7dddd72c75ee21a772e53ad72ce4d7bb39"
+    }
+  ]
+}
