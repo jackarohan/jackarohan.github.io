@@ -1,0 +1,16 @@
+{
+  "data": [
+    {"record_date":"2025-07-01","current_month_gross_rcpt_amt":"350000","current_month_outly_amt":"550000"},
+    {"record_date":"2025-06-01","current_month_gross_rcpt_amt":"380000","current_month_outly_amt":"520000"},
+    {"record_date":"2025-05-01","current_month_gross_rcpt_amt":"420000","current_month_outly_amt":"510000"},
+    {"record_date":"2025-04-01","current_month_gross_rcpt_amt":"520000","current_month_outly_amt":"480000"},
+    {"record_date":"2025-03-01","current_month_gross_rcpt_amt":"390000","current_month_outly_amt":"540000"},
+    {"record_date":"2025-02-01","current_month_gross_rcpt_amt":"360000","current_month_outly_amt":"530000"},
+    {"record_date":"2025-01-01","current_month_gross_rcpt_amt":"370000","current_month_outly_amt":"520000"},
+    {"record_date":"2024-12-01","current_month_gross_rcpt_amt":"340000","current_month_outly_amt":"500000"},
+    {"record_date":"2024-11-01","current_month_gross_rcpt_amt":"330000","current_month_outly_amt":"490000"},
+    {"record_date":"2024-10-01","current_month_gross_rcpt_amt":"320000","current_month_outly_amt":"480000"},
+    {"record_date":"2024-09-01","current_month_gross_rcpt_amt":"310000","current_month_outly_amt":"470000"},
+    {"record_date":"2024-08-01","current_month_gross_rcpt_amt":"300000","current_month_outly_amt":"460000"}
+  ]
+}
