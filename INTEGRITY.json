@@ -1,71 +1,66 @@
 {
-  "version": "v1.2.0",
-  "generated": "2025-08-13T03:52:27.340099Z",
+  "version": "v1.4.0",
+  "generated": "2025-08-13T13:06:51.452671Z",
   "files": [
     {
       "file": "README.md",
-      "size": 744,
-      "sha256": "4721adf72ee8d8625d69dffc85f7e4773c1666886790850788539cdce40ef989"
+      "sha256": "6cb6be04f7f25ec10fc50adfc06c72f9f6ad14a2c6bd1fa25e178fa5d74c9d1d"
     },
     {
       "file": "index.html",
-      "size": 4131,
-      "sha256": "0f7d2033d787bf342826a41a87cf93b1939c5bba229df651c1b4c9fdd6fe40b3"
+      "sha256": "ba3c323558f3e25d3c5b23ec4364a2c32135c78eb1e71eaf7f40249b4205d7d5"
     },
     {
       "file": "js/app.js",
-      "size": 3599,
-      "sha256": "5198eade15a28b3e1eda5a37e46787d334bb85f41eecf089fd6ed6ef07dc9b94"
+      "sha256": "1a91662adb421084be68e5a64c8f5a114c6eccae2877729e0601ab065a34f728"
     },
     {
       "file": "js/config.js",
-      "size": 322,
-      "sha256": "ec71c321a55c8a7b1dc8e3974dc5cd61adc1c4c424402d37b5eb0485c17204df"
+      "sha256": "90790f27a7f086885c2b150e32b6701ca1dd8ea7e21fec9f25d68d6331ab462f"
     },
     {
       "file": "js/datasources.js",
-      "size": 5797,
-      "sha256": "cf09a1980d2e4a359716f70c27840e8d8bd9199c2e93198e441b3115e525ef03"
+      "sha256": "5dd9f6a3e6c9c970c1becbfcfb5ac490c34944a251f2505efdd6da4180a6ad0c"
     },
     {
       "file": "js/utils.js",
-      "size": 2071,
-      "sha256": "dd13b2a02c5408b00c122adbaf542f08a3bed4e1b1af1e6cf1c1b927d19c1981"
+      "sha256": "a5febbbef0ff02d3930794e5961be3238a5565110583f8c2e8191dea918979de"
     },
     {
       "file": "css/styles.css",
-      "size": 2349,
-      "sha256": "25296e0ba0949a992314ce16cb937e5e5393683afaa060fb33726f5ce96f1b60"
+      "sha256": "62d00710c48ee839f1859fc276fc3126fc2c2bd9c838d92f937f8171acf30e00"
     },
     {
       "file": "samples/acm_10y.csv",
-      "size": 45,
       "sha256": "67355baa86993f5ebf6a19e56e783d13a12951e0ccf1afec80900669188affd8"
     },
     {
+      "file": "samples/interest_expense.json",
+      "sha256": "74bebd976fa8d5d10361b6c6189772d96ecd4f8e843c2cab2e8815ef7ef4c069"
+    },
+    {
+      "file": "samples/mspd.json",
+      "sha256": "16eb63492a3461cc3778bd2bcd9b5fa60049944989027b114c7d2bb1ffb1a11a"
+    },
+    {
+      "file": "samples/mts_table_1.json",
+      "sha256": "d162d47e8fbd35f8d56992584c06a017196fbf0efc8c456448efe4a7a09b79e9"
+    },
+    {
+      "file": "samples/mts_table_3.json",
+      "sha256": "923fd3e446cc1e61445f69ec9b1e0557249aa2a5236e2f9cdd28fef6963c0e00"
+    },
+    {
       "file": "samples/realyield.xml",
-      "size": 322,
-      "sha256": "70cfdafdf302ad9bab444c783c1554df74fe0e2fa0744817c30af1134aea2f2a"
+      "sha256": "fb06b9389b66fca816b28cde5c9007539d7b9f5a9e6caaaa908a3230df8b85a4"
     },
     {
       "file": "samples/yield.xml",
-      "size": 509,
-      "sha256": "0616cb3b66d784e4a37b29962c011af18f66087ea040e031953d4da07bc3035d"
-    },
-    {
-      "file": "tests/browser.html",
-      "size": 605,
-      "sha256": "ad783287a7f68a181457665a65ca73d18a82a008922b04a7cfda569e83f2a70d"
-    },
-    {
-      "file": "tests/spec.js",
-      "size": 961,
-      "sha256": "299d50f33ee9b0c2c6bd907c5e10b3e7b0394ccf4756278a09352364ed0a55ab"
+      "sha256": "974bfa0c3825aad198c37fd72b2aa6b565acd0a991adbd87d0eefa2ba123516f"
     },
     {
       "file": ".github/workflows/pages.yml",
-      "size": 636,
-      "sha256": "98c1c2e35f4b2c457a74f0891d924f7dddd72c75ee21a772e53ad72ce4d7bb39"
+      "sha256": "18b7938457fdc43c394ec207558bf3dd39192e868370beabb792e93438c2ca3d"
     }
   ]
 }

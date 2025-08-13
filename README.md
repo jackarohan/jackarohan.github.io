@@ -1,22 +1,27 @@
-# US Debt Dashboard — v1.2.0
+# US Debt Dashboard — v1.4.0
 
-Client-side dashboard to track US debt service risk. No backend. Deployed via GitHub Pages.
+**What changed**
+- Fixed JS files that previously had `<script>` tags inside (breaking execution).
+- Switched rates to **FRED JSON API** with API key (CORS-friendly).
+- Full offline coverage for **MTS** and **MSPD** using sample JSONs.
+- Per‑KPI error handling: each metric loads independently and shows “Unavailable” if it fails.
+- Added **localStorage cache** with TTL (default 180 min): values render fast from cache and refresh in background.
+- Added light **Chart.js** visuals (bar charts) for interest ratios, mix, and rates.
+- Responsive layout and doc links.
 
-## Features
-- Interest burden ratios (TTM) from MTS
-- Bills + FRNs share of marketable debt (MSPD)
-- r − g using 10y real (FRED/Treasury) and a configurable growth trend
-- Term premia: KW (FRED) + ACM best-effort
-- Rates source toggle (FRED vs Treasury XML)
-- Offline test mode using local samples
-- Browser test suite (Mocha)
+**Setup**
+1. Edit `js/config.js`:
+   - `fredApiKey`: keep your FRED key.
+   - Optional: set `altNominalURL` and `altRealURL` to self-hosted JSON mirrors of Treasury yields (to avoid XML/CORS).
+   - Leave `acmCSVURL` blank to keep ACM disabled (no scraping).
+2. Deploy via GitHub Pages. Use the included workflow under `.github/workflows/pages.yml`.
+3. Toggle **Offline test** to validate the UI even with no network.
 
-## Run locally
-Open `index.html` directly, or serve with any static server.
+**Data**
+- MTS (Table 1, Table 3; Interest Expense fallback).
+- MSPD (marketable outstanding by security type).
+- FRED (DGS10, DFII10, T10Y2Y, THREEFYTP10).
 
-## Tests
-Open `tests/browser.html` in a browser. It validates XML/CSV parsing and ACM fallback.
-
-## Deploy to GitHub Pages
-Push to `main`; the included workflow `.github/workflows/pages.yml` publishes the site.
-
+**Notes**
+- If your network blocks `api.fiscaldata.treasury.gov`, offline mode or a proxy is your safety net.
+- ACM term premium is **off** unless you supply a CSV URL in `config.js`.
