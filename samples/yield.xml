@@ -1,18 +1,2 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<feed>
-  <title>Daily Treasury Par Yield Curve Rates</title>
-  <entry>
-    <NEW_DATE>2025-08-12</NEW_DATE>
-    <BC_1MONTH>4.33</BC_1MONTH>
-    <BC_2MONTH>4.43</BC_2MONTH>
-    <BC_3MONTH>4.53</BC_3MONTH>
-    <BC_6MONTH>4.12</BC_6MONTH>
-    <BC_1YEAR>3.90</BC_1YEAR>
-    <BC_2YEAR>3.78</BC_2YEAR>
-    <BC_5YEAR>3.83</BC_5YEAR>
-    <BC_7YEAR>4.03</BC_7YEAR>
-    <BC_10YEAR>4.29</BC_10YEAR>
-    <BC_20YEAR>4.87</BC_20YEAR>
-    <BC_30YEAR>4.88</BC_30YEAR>
-  </entry>
-</feed>
+<feed><entry><NEW_DATE>2025-08-12</NEW_DATE><BC_2YEAR>3.78</BC_2YEAR><BC_10YEAR>4.29</BC_10YEAR></entry></feed>
