@@ -1,9 +1,29 @@
 {
   "data": [
-    {"record_date":"2025-07-31","security_type_desc":"Bills","outstanding_amt":6000},
-    {"record_date":"2025-07-31","security_type_desc":"FRNs","outstanding_amt":4500},
-    {"record_date":"2025-07-31","security_type_desc":"Notes","outstanding_amt":16000},
-    {"record_date":"2025-07-31","security_type_desc":"Bonds","outstanding_amt":6000},
-    {"record_date":"2025-07-31","security_type_desc":"TIPS","outstanding_amt":1700}
+    {
+      "record_date": "2025-07-31",
+      "security_type_desc": "Bills",
+      "outstanding_amt": 6000
+    },
+    {
+      "record_date": "2025-07-31",
+      "security_type_desc": "FRNs",
+      "outstanding_amt": 4500
+    },
+    {
+      "record_date": "2025-07-31",
+      "security_type_desc": "Notes",
+      "outstanding_amt": 16000
+    },
+    {
+      "record_date": "2025-07-31",
+      "security_type_desc": "Bonds",
+      "outstanding_amt": 6000
+    },
+    {
+      "record_date": "2025-07-31",
+      "security_type_desc": "TIPS",
+      "outstanding_amt": 1700
+    }
   ]
 }

@@ -1,16 +1,52 @@
 {
   "data": [
-    {"record_date":"2025-07-01","int_expense_amt":"97000"},
-    {"record_date":"2025-06-01","int_expense_amt":"94000"},
-    {"record_date":"2025-05-01","int_expense_amt":"90000"},
-    {"record_date":"2025-04-01","int_expense_amt":"91000"},
-    {"record_date":"2025-03-01","int_expense_amt":"89000"},
-    {"record_date":"2025-02-01","int_expense_amt":"88000"},
-    {"record_date":"2025-01-01","int_expense_amt":"87000"},
-    {"record_date":"2024-12-01","int_expense_amt":"86000"},
-    {"record_date":"2024-11-01","int_expense_amt":"85000"},
-    {"record_date":"2024-10-01","int_expense_amt":"83000"},
-    {"record_date":"2024-09-01","int_expense_amt":"82000"},
-    {"record_date":"2024-08-01","int_expense_amt":"80000"}
+    {
+      "record_date": "2025-07-01",
+      "int_expense_amt": "97000"
+    },
+    {
+      "record_date": "2025-06-01",
+      "int_expense_amt": "94000"
+    },
+    {
+      "record_date": "2025-05-01",
+      "int_expense_amt": "90000"
+    },
+    {
+      "record_date": "2025-04-01",
+      "int_expense_amt": "91000"
+    },
+    {
+      "record_date": "2025-03-01",
+      "int_expense_amt": "89000"
+    },
+    {
+      "record_date": "2025-02-01",
+      "int_expense_amt": "88000"
+    },
+    {
+      "record_date": "2025-01-01",
+      "int_expense_amt": "87000"
+    },
+    {
+      "record_date": "2024-12-01",
+      "int_expense_amt": "86000"
+    },
+    {
+      "record_date": "2024-11-01",
+      "int_expense_amt": "85000"
+    },
+    {
+      "record_date": "2024-10-01",
+      "int_expense_amt": "83000"
+    },
+    {
+      "record_date": "2024-09-01",
+      "int_expense_amt": "82000"
+    },
+    {
+      "record_date": "2024-08-01",
+      "int_expense_amt": "80000"
+    }
   ]
 }
