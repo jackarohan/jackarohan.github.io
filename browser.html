@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Dashboard Browser Tests</title>
+  <link rel="stylesheet" href="https://unpkg.com/mocha/mocha.css">
+</head>
+<body>
+  <div id="mocha"></div>
+  <script src="../js/config.js"></script>
+  <script src="../js/utils.js"></script>
+  <script src="../js/datasources.js"></script>
+  <script src="https://unpkg.com/mocha/mocha.js"></script>
+  <script src="https://unpkg.com/chai/chai.js"></script>
+  <script>mocha.setup('bdd'); const { expect } = chai;</script>
+  <script src="spec.js"></script>
+  <script>mocha.run();</script>
+</body>
+</html>
